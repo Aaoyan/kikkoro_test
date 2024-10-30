@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head><style>html, body, #map { width: 100%; height: 100%; }</style></head>
+<head>
+    <style>
+        html, body, #map { width: 100%; height: 100%; }
+    </style>
+</head>
 <body>
 <div id="map"></div>
 
 <script>
 function initMap() {
-    // ‚½‚­‚³‚ñ‚Ì’n“_...
+    // ãƒ«ãƒ¼ãƒˆã®ãƒã‚¤ãƒ³ãƒˆ
     var points = [
         new google.maps.LatLng(35.681382,139.766084),
         new google.maps.LatLng(35.630152,139.74044),
@@ -27,112 +31,111 @@ function initMap() {
         new google.maps.LatLng(34.73348,135.500109),
     ];
 
-    // ƒ}ƒbƒv‚Ì¶¬
+    // åœ°å›³ã®ä½œæˆ
     var map = new google.maps.Map(document.getElementById("map"), {
-        center: new google.maps.LatLng(35.681298, 139.766247), // ƒ}ƒbƒv‚Ì’†S
-        zoom: 7 // ƒY[ƒ€ƒŒƒxƒ‹
+        center: new google.maps.LatLng(35.681298, 139.766247),
+        zoom: 7
     });
 
-    // ’n“_‚ğ•ªŠ„‚µ‚Äƒ‹[ƒgŒŸõ‚ğs‚¢‚Ü‚·B
+    // ç¾åœ¨åœ°ã‚’å–å¾—ã—ã¦åœ°å›³ã®ä¸­å¿ƒã«è¨­å®š
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var currentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setCenter(currentLocation);
 
-    var d = new google.maps.DirectionsService(); // ƒ‹[ƒgŒŸõƒIƒuƒWƒFƒNƒg
-    var origin = null, waypoints = [], dest = null; // o”­’nAŒo—R’nA–Ú“I’n
-    var resultMap = {}; // •ªŠ„‚µ‚Äƒ‹[ƒgŒŸõ‚µ‚½Œ‹‰Êƒf[ƒ^
-    var requestIndex = 0; // ŒŸõ”Ô†
-    var done = 0; // ƒ‹[ƒgŒŸõ‚ªŠ®—¹‚µ‚½”
+            // ç¾åœ¨åœ°ã«ãƒãƒ¼ã‚«ãƒ¼ã‚’è¿½åŠ 
+            new google.maps.Marker({
+                position: currentLocation,
+                map: map,
+                title: "ç¾åœ¨åœ°"
+            });
+        }, function(error) {
+            console.error("ç¾åœ¨åœ°ã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸ: " + error.message);
+        });
+    } else {
+        alert("ã“ã®ãƒ–ãƒ©ã‚¦ã‚¶ã¯ç¾åœ¨åœ°ã®å–å¾—ã‚’ã‚µãƒãƒ¼ãƒˆã—ã¦ã„ã¾ã›ã‚“ã€‚");
+    }
+
+    // ãƒ«ãƒ¼ãƒˆè¡¨ç¤ºã®æº–å‚™
+    var directionsService = new google.maps.DirectionsService();
+    var origin = null, waypoints = [], dest = null;
+    var resultMap = {};
+    var requestIndex = 0;
+    var done = 0;
     for (var i = 0, len = points.length; i < len; i++) {
-        // Å‰‚Ìê‡Aorigin‚É’l‚ğƒZƒbƒg
         if (origin == null) {
             origin = points[i];
-        }
-        // Œo—R’n‚ª8‚Â‚½‚Ü‚Á‚½‚©ÅŒã‚Ì’n“_‚Ìê‡Aƒ‹[ƒgŒŸõ
-        else if (waypoints.length == 8 || i == len - 1) {
+        } else if (waypoints.length == 8 || i == len - 1) {
             dest = points[i];
 
-            (function(index){
-                // ƒ‹[ƒgŒŸõ‚ÌğŒ
+            (function(index) {
                 var request = {
-                    origin: origin, // o”­’n
-                    destination: dest, // –Ú“I’n
-                    waypoints: waypoints, // Œo—R’n
-                    travelMode: google.maps.DirectionsTravelMode.WALKING, // Œğ’Êè’i(•àsBDRIVING‚Ìê‡‚ÍÔ)
+                    origin: origin,
+                    destination: dest,
+                    waypoints: waypoints,
+                    travelMode: google.maps.DirectionsTravelMode.WALKING
                 };
-                console.log(request);
-                // ƒ‹[ƒgŒŸõ
-                d.route(request, function(result, status){
-                    // OK‚Ìê‡ƒ‹[ƒgƒf[ƒ^•Û
+                directionsService.route(request, function(result, status) {
                     if (status == google.maps.DirectionsStatus.OK) {
-                        resultMap[index] = result; // •Às‚ÅƒŠƒNƒGƒXƒg‚·‚é‚Ì‚Å”z—ñ‚¾‚ÆƒŠƒNƒGƒXƒg‡‚Æ‚¸‚ê‚éê‡‚ª‚ ‚è‚Ü‚·
+                        resultMap[index] = result;
                         done++;
-                    }
-                    else {
-                        console.log(status); // ƒfƒoƒbƒO
+                    } else {
+                        console.log(status);
                     }
                 });
             })(requestIndex);
 
             requestIndex++;
-            origin = points[i]; // ¡‰ñ‚Ì–Ú“I’n‚ğŸ‰ñ‚Ìo”­’n‚É‚µ‚Ü‚·B
+            origin = points[i];
             waypoints = [];
-        }
-        // ã‹LˆÈŠOAwaypoints‚É’n“_‚ğ’Ç‰Á
-        else {
+        } else {
             waypoints.push({ location: points[i], stopover: true });
         }
     }
 
-    // ƒ}[ƒJ[‚ğ•\¦‚·‚éê‡‚Ì€”õ
     var infoWindow = new google.maps.InfoWindow();
     var mark = function(position, content) {
         var marker = new google.maps.Marker({
-            map: map, // •`‰ææ‚Ì’n}
-            position: position // À•W
+            map: map,
+            position: position
         });
-        // ƒNƒŠƒbƒN‚«o‚µ‚ğ•\¦
-        marker.addListener("click", function(){
+        marker.addListener("click", function() {
             infoWindow.setContent(content);
             infoWindow.open(map, marker);
         });
     };
 
-    var sid = setInterval(function(){
-        // •ªŠ„‚µ‚½‚·‚×‚Ä‚ÌŒŸõ‚ªŠ®—¹‚·‚é‚Ü‚Å‘Ò‚¿‚Ü‚·B
+    var sid = setInterval(function() {
         if (requestIndex > done) return;
         clearInterval(sid);
 
-        // ‚·‚×‚Ä‚ÌŒ‹‰Ê‚Ìƒ‹[ƒgÀ•W‚ğ‡”Ô‚Éæ“¾‚µ‚Ä•½’R‚È”z—ñ‚É‚µ‚Ü‚·B
         var path = [];
         var result;
         for (var i = 0, len = requestIndex; i < len; i++) {
-            result = resultMap[i]; // ŒŸõŒ‹‰Ê
-            var legs = result.routes[0].legs; // Array<DirectionsLeg>
+            result = resultMap[i];
+            var legs = result.routes[0].legs;
             for (var li = 0, llen = legs.length; li < llen; li++) {
-                var leg = legs[li]; // DirectionLeg
-                var steps = leg.steps; // Array<DirectionsStep>
-                // DirectionsStep‚ª‚Á‚Ä‚¢‚épath‚ğæ“¾‚µ‚Ä•½’R(2ŸŒ³”z—ñ¨1ŸŒ³”z—ñ)‚É‚µ‚Ü‚·B
-                var _path = steps.map(function(step){ return step.path })
-                    .reduce(function(all, paths){ return all.concat(paths) });
+                var leg = legs[li];
+                var steps = leg.steps;
+                var _path = steps.map(function(step) { return step.path })
+                    .reduce(function(all, paths) { return all.concat(paths) });
                 path = path.concat(_path);
-
-                // ƒ}[ƒJ[‚ª•K—v‚È‚çƒ}[ƒJ[‚ğ•\¦‚µ‚Ü‚·B
                 mark(leg.start_location, leg.start_address);
             }
         }
-        // ƒ}[ƒJ[‚ª•K—v‚È‚çƒ}[ƒJ[‚ğ•\¦‚µ‚Ü‚·B(ÅI)
-        var endLeg = result.routes[0].legs[result.routes[0].legs.length-1];
+        var endLeg = result.routes[0].legs[result.routes[0].legs.length - 1];
         mark(endLeg.end_location, endLeg.end_address);
 
-        // ƒpƒX‚ğ•`‰æ‚µ‚Ü‚·B
-        var line = new google.maps.Polyline({
-            map: map, // •`‰ææ‚Ì’n}
-            strokeColor: "#2196f3", // ü‚ÌF
-            strokeOpacity: 0.8, // ü‚Ì•s“§–¾“x
-            strokeWeight: 6, // æ‚Ì‘¾‚³
-            path: path // •`‰æ‚·‚éƒpƒXƒf[ƒ^
+        new google.maps.Polyline({
+            map: map,
+            strokeColor: "#2196f3",
+            strokeOpacity: 0.8,
+            strokeWeight: 6,
+            path: path
         });
     }, 1000);
 }
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4gaTWcNhN7cWMKrFc5n66ubDOgZ8zf7E&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
 </body>
 </html>
